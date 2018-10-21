@@ -1,0 +1,5 @@
+.idea/
+sse-serv
+coverage
+*.test
+*.prof
