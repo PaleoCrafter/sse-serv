@@ -93,7 +93,7 @@ func TestResponseHandler_Handle_4(t *testing.T) {
 	defer ctrl.Finish()
 
 	providerMock := mock_amqp.NewMockProvider(ctrl)
-	providerMock.EXPECT().Consumer(gomock.Any()).Return(nil, errors.New(""))
+	providerMock.EXPECT().Consumer(gomock.Any(), gomock.Any()).Return(nil, errors.New(""))
 
 	recorder := httptest.NewRecorder()
 
@@ -120,7 +120,7 @@ func TestResponseHandler_Handle_5(t *testing.T) {
 	consumerMock.EXPECT().Close().Times(1)
 
 	providerMock := mock_amqp.NewMockProvider(ctrl)
-	providerMock.EXPECT().Consumer(gomock.Any()).Return(consumerMock, nil)
+	providerMock.EXPECT().Consumer(gomock.Any(), gomock.Any()).Return(consumerMock, nil)
 
 	recorder := httptest.NewRecorder()
 
@@ -147,7 +147,7 @@ func TestResponseHandler_Handle_6(t *testing.T) {
 	consumer.EXPECT().Close().Times(1)
 
 	provider := mock_amqp.NewMockProvider(ctrl)
-	provider.EXPECT().Consumer(gomock.Any()).Return(consumer, nil)
+	provider.EXPECT().Consumer(gomock.Any(), gomock.Any()).Return(consumer, nil)
 
 	logger := mock_logg.NewMockLogger(ctrl)
 	logger.EXPECT().Info(gomock.Any(), gomock.Any()).Times(2)

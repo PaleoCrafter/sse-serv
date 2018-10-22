@@ -79,9 +79,10 @@ func (r *responseHandler) drain() error {
 	var msgs <-chan impl.Delivery
 	var err error
 
-	onAmqpClose := make(chan *impl.Error)
+	onBrokerClose := make(chan *impl.Error)
+	onQueueDelete := make(chan string)
 
-	if consumer, err = r.provider.Consumer(onAmqpClose); err == nil {
+	if consumer, err = r.provider.Consumer(onQueueDelete, onBrokerClose); err == nil {
 		defer consumer.Close()
 	} else {
 		return err
@@ -104,7 +105,8 @@ func (r *responseHandler) drain() error {
 	r.logger.Info("%s %s", "connected", r.queue)
 
 	select {
-	case _ = <-onAmqpClose:
+	case _ = <-onBrokerClose:
+	case _ = <-onQueueDelete:
 	case _ = <-r.ctxDone():
 	}
 

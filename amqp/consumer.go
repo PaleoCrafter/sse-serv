@@ -10,7 +10,7 @@ import (
 
 // Provider ...
 type Provider interface {
-	Consumer(onClose chan *impl.Error) (Consumer, error)
+	Consumer(onCancel chan string, onClose chan *impl.Error) (Consumer, error)
 }
 
 // Consumer ...
@@ -24,8 +24,9 @@ type provider struct {
 }
 
 type consumer struct {
-	broker  Broker
-	channel *impl.Channel
+	broker   Broker
+	channel  *impl.Channel
+	onCancel chan string
 }
 
 // NewProvider ...
@@ -33,7 +34,7 @@ func NewProvider(pool BrokerPool) Provider {
 	return &provider{pool}
 }
 
-func (p *provider) Consumer(onClose chan *impl.Error) (Consumer, error) {
+func (p *provider) Consumer(onCancel chan string, onClose chan *impl.Error) (Consumer, error) {
 	var channel *impl.Channel
 	var broker Broker
 	var err error
@@ -48,11 +49,11 @@ func (p *provider) Consumer(onClose chan *impl.Error) (Consumer, error) {
 		return nil, err
 	}
 
-	return newConsumer(broker, channel), nil
+	return newConsumer(broker, channel, onCancel), nil
 }
 
-func newConsumer(broker Broker, channel *impl.Channel) Consumer {
-	return &consumer{broker, channel}
+func newConsumer(broker Broker, channel *impl.Channel, onCancel chan string) Consumer {
+	return &consumer{broker, channel, onCancel}
 }
 
 func (c *consumer) Consume(queue string) (<-chan impl.Delivery, error) {
@@ -64,11 +65,12 @@ func (c *consumer) Consume(queue string) (<-chan impl.Delivery, error) {
 		return nil, err
 	}
 
-	if que.Consumers != 0 {
-		return nil, errors.New("max consumers exceeded")
+	if que.Consumers == 0 {
+		c.channel.NotifyCancel(c.onCancel)
+		return c.channel.Consume(queue, "", f, f, f, f, nil)
 	}
 
-	return c.channel.Consume(queue, "", f, f, f, f, nil)
+	return nil, errors.New("max consumers exceeded")
 }
 
 func (c *consumer) Close() {

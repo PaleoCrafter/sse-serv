@@ -35,16 +35,16 @@ func (m *MockProvider) EXPECT() *MockProviderMockRecorder {
 }
 
 // Consumer mocks base method
-func (m *MockProvider) Consumer(arg0 chan *amqp.Error) (amqp0.Consumer, error) {
-	ret := m.ctrl.Call(m, "Consumer", arg0)
+func (m *MockProvider) Consumer(arg0 chan string, arg1 chan *amqp.Error) (amqp0.Consumer, error) {
+	ret := m.ctrl.Call(m, "Consumer", arg0, arg1)
 	ret0, _ := ret[0].(amqp0.Consumer)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Consumer indicates an expected call of Consumer
-func (mr *MockProviderMockRecorder) Consumer(arg0 interface{}) *gomock.Call {
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Consumer", reflect.TypeOf((*MockProvider)(nil).Consumer), arg0)
+func (mr *MockProviderMockRecorder) Consumer(arg0, arg1 interface{}) *gomock.Call {
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Consumer", reflect.TypeOf((*MockProvider)(nil).Consumer), arg0, arg1)
 }
 
 // MockConsumer is a mock of Consumer interface
